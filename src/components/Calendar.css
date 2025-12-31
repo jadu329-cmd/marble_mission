@@ -1,0 +1,261 @@
+.calendar-container {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.calendar-nav-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calendar-nav-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.calendar-month {
+  font-size: 1.5rem;
+  color: #333;
+  margin: 0;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.calendar-weekday {
+  text-align: center;
+  font-weight: bold;
+  color: #666;
+  padding: 10px;
+  font-size: 0.9rem;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  position: relative;
+  background: white;
+  z-index: 1;
+}
+
+.calendar-day:hover {
+  border-color: #667eea;
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.calendar-day.empty {
+  cursor: default;
+  border: none;
+  background: transparent;
+}
+
+.calendar-day.today {
+  border-color: #f5576c;
+  background: #fff5f5;
+}
+
+.calendar-day.has-missions {
+  border-color: #667eea;
+  background: #f0f4ff;
+}
+
+.day-number {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.day-scores {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-top: 2px;
+  width: 100%;
+  align-items: center;
+}
+
+.day-score {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px 4px;
+  border-radius: 3px;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.sarang-score {
+  background: rgba(102, 126, 234, 0.15);
+  color: #667eea;
+}
+
+.hana-score {
+  background: rgba(240, 147, 251, 0.15);
+  color: #f5576c;
+}
+
+.score-label {
+  font-weight: bold;
+  font-size: 1.0rem !important;
+  line-height: 1.2;
+}
+
+.score-value {
+  font-weight: bold;
+  font-size: 1.0rem !important;
+  line-height: 1.2;
+}
+
+.day-status {
+  display: flex;
+  gap: 4px;
+  margin-top: auto;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.sarang-dot {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.hana-dot {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.day-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  background: white;
+  border: 2px solid #667eea;
+  border-radius: 10px;
+  padding: 12px;
+  min-width: 250px;
+  max-width: 350px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s;
+  z-index: 1000;
+  margin-bottom: 8px;
+}
+
+.calendar-day:hover .day-tooltip {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(-5px);
+}
+
+.day-tooltip-content {
+  font-size: 0.85rem;
+}
+
+.tooltip-department {
+  margin-bottom: 10px;
+}
+
+.tooltip-department:last-child {
+  margin-bottom: 0;
+}
+
+.tooltip-dept-name {
+  font-weight: bold;
+  font-size: 0.95rem;
+  margin-bottom: 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.tooltip-dept-name.sarang {
+  color: #667eea;
+}
+
+.tooltip-dept-name.hana {
+  color: #f5576c;
+}
+
+.tooltip-mission {
+  padding: 3px 0;
+  color: #333;
+  font-size: 0.85rem;
+}
+
+.tooltip-total {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid #e0e0e0;
+  font-weight: bold;
+  color: #667eea;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .calendar-container {
+    padding: 15px;
+  }
+
+  .calendar-month {
+    font-size: 1.2rem;
+  }
+
+  .calendar-day {
+    padding: 5px;
+  }
+
+  .day-number {
+    font-size: 0.9rem;
+  }
+
+  .day-score {
+    font-size: 0.5rem;
+    padding: 1px 3px;
+  }
+
+  .score-label {
+    font-size: 0.9rem;
+  }
+
+  .score-value {
+    font-size: 0.9rem;
+    line-height: 1;
+  }
+}
+
