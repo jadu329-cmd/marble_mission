@@ -189,18 +189,19 @@
 }
 
 @media (max-width: 768px) {
-  /* 모바일에서 툴팁을 터치로 표시 */
+  /* 모바일에서 툴팁을 꾹 누르기로 표시 */
   .day-tooltip {
     display: block;
     opacity: 0;
     pointer-events: none;
     position: fixed; /* fixed로 변경하여 화면 잘림 방지 */
-    bottom: auto;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) scale(0.9);
     max-width: 90vw;
     min-width: 280px;
+    max-height: 80vh;
+    overflow-y: auto;
     z-index: 2000;
     margin: 0;
     transition: opacity 0.3s, transform 0.3s;
@@ -213,39 +214,6 @@
   }
 
   /* 툴팁 배경 오버레이 */
-  .day-tooltip.show::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: -1;
-  }
-
-  /* 툴팁 닫기 버튼 */
-  .day-tooltip.show::after {
-    content: '✕';
-    position: absolute;
-    top: -15px;
-    right: -15px;
-    width: 32px;
-    height: 32px;
-    background: #667eea;
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-    font-weight: bold;
-    cursor: pointer;
-    z-index: 2001;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  }
-
-  /* 배경 클릭 시 툴팁 닫기 */
   body.mobile-tooltip-open::before {
     content: '';
     position: fixed;
