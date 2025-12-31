@@ -43,7 +43,7 @@
 }
 
 .score-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   border-radius: 15px;
   padding: 25px;
   text-align: center;
@@ -51,15 +51,56 @@
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  position: relative;
+  border: 3px solid transparent;
+}
+
+.score-card.sarang {
+  background: linear-gradient(135deg, #f5576c 0%, #e63946 100%);
 }
 
 .score-card.hana {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .score-card.active {
   transform: scale(1.05);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.score-card.winner {
+  border-color: #ffd700;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+  transform: scale(1.05);
+}
+
+.score-card.tie {
+  border-color: #999;
+}
+
+.score-card .winner-badge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  font-size: 2rem;
+  animation: bounce 1s infinite;
+}
+
+.score-card .tie-badge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: #999;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 }
 
 .department-name {

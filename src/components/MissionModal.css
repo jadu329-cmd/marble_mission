@@ -82,11 +82,11 @@
 }
 
 .dept-btn.sarang {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #f5576c 0%, #e63946 100%);
 }
 
 .dept-btn.hana {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .dept-btn:hover {
@@ -196,6 +196,27 @@
 
 .meditation-members {
   margin-top: 10px;
+}
+
+.members-split-container {
+  display: flex;
+  gap: 20px;
+}
+
+.members-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.members-section-title {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #667eea;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #667eea;
+  text-align: center;
 }
 
 .members-grid {
@@ -333,11 +354,25 @@
   padding: 10px;
   text-align: center;
   font-weight: bold;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2000;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  min-width: 120px;
+  pointer-events: none;
 }
 
 @media (max-width: 768px) {
   .modal-content {
     max-height: 95vh;
+  }
+
+  .members-split-container {
+    flex-direction: column;
+    gap: 15px;
   }
 
   .members-grid {

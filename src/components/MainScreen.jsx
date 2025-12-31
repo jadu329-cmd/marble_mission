@@ -3,6 +3,7 @@ import { getAllTimeScores } from '../services/missionService'
 import { departments } from '../data/missions'
 import Calendar from './Calendar'
 import MissionModal from './MissionModal'
+import MonthlyStats from './MonthlyStats'
 import { format } from 'date-fns'
 import './MainScreen.css'
 
@@ -13,6 +14,7 @@ const MainScreen = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [scores, setScores] = useState({ sarang: 0, hana: 0 })
   const [loading, setLoading] = useState(true)
+  const [calendarRefreshKey, setCalendarRefreshKey] = useState(0)
 
   useEffect(() => {
     loadScores()
@@ -45,6 +47,14 @@ const MainScreen = () => {
     setSelectedDate(null)
     setSelectedDepartment(null)
     loadScores() // 점수 새로고침
+    // 캘린더 새로고침
+    setCalendarRefreshKey(prev => prev + 1)
+  }
+
+  const handleMissionSave = () => {
+    // 미션 저장 후 캘린더와 점수 새로고침
+    loadScores()
+    setCalendarRefreshKey(prev => prev + 1)
   }
 
   const handleMonthChange = (newMonth) => {
@@ -61,22 +71,44 @@ const MainScreen = () => {
       <div className="score-board">
         <h2>부서별 총 점수</h2>
         <div className="scores-container">
-          {departments.map(dept => (
-            <div 
-              key={dept.id} 
-              className={`score-card ${dept.id}`}
-            >
-              <div className="department-name">{dept.name}</div>
-              <div className="score-value">
-                {loading ? '...' : scores[dept.id] || 0}
-                <span className="score-unit">점</span>
+          {departments.map(dept => {
+            const sarangScore = scores.sarang || 0
+            const hanaScore = scores.hana || 0
+            let winner = null
+            let isTie = false
+            
+            if (!loading) {
+              if (sarangScore > hanaScore) {
+                winner = 'sarang'
+              } else if (hanaScore > sarangScore) {
+                winner = 'hana'
+              } else if (sarangScore === hanaScore && sarangScore > 0) {
+                isTie = true
+              }
+            }
+            
+            const isWinner = winner === dept.id
+            
+            return (
+              <div 
+                key={dept.id} 
+                className={`score-card ${dept.id} ${isWinner ? 'winner' : ''} ${isTie ? 'tie' : ''}`}
+              >
+                <div className="department-name">{dept.name}</div>
+                <div className="score-value">
+                  {loading ? '...' : scores[dept.id] || 0}
+                  <span className="score-unit">점</span>
+                </div>
+                {isWinner && <div className="winner-badge">🏆</div>}
+                {isTie && <div className="tie-badge">무승부</div>}
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
 
       <Calendar
+        key={calendarRefreshKey}
         currentMonth={currentMonth}
         onMonthChange={handleMonthChange}
         onDateClick={(date) => {
@@ -85,6 +117,15 @@ const MainScreen = () => {
           setSelectedDepartment(null)
           setIsModalOpen(true)
         }}
+        onRefresh={() => {
+          loadScores()
+          setCalendarRefreshKey(prev => prev + 1)
+        }}
+      />
+
+      <MonthlyStats 
+        currentMonth={currentMonth}
+        onMonthChange={handleMonthChange}
       />
 
       {isModalOpen && selectedDate && (
@@ -94,6 +135,7 @@ const MainScreen = () => {
           date={selectedDate}
           department={selectedDepartment}
           onDepartmentSelect={handleDepartmentSelect}
+          onSave={handleMissionSave}
         />
       )}
     </div>

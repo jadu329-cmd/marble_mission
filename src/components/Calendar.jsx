@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, getDay, addMonths, subMonths } from 'date-fns'
-import { getMissionData, calculateDailyScore } from '../services/missionService'
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, getDay, addMonths, subMonths, parseISO } from 'date-fns'
+import { getMissionData, calculateDailyScore, deleteDepartmentData, getMonthMissionData } from '../services/missionService'
 import { missions } from '../data/missions'
 import './Calendar.css'
 
-const Calendar = ({ onDateClick, currentMonth, onMonthChange }) => {
+const Calendar = ({ onDateClick, currentMonth, onMonthChange, onRefresh }) => {
   const [missionStatus, setMissionStatus] = useState({})
   const [loading, setLoading] = useState(true)
 
@@ -19,16 +19,23 @@ const Calendar = ({ onDateClick, currentMonth, onMonthChange }) => {
       const monthEnd = endOfMonth(currentMonth)
       const days = eachDayOfInterval({ start: monthStart, end: monthEnd })
       
-      const status = {}
+      // 배치 쿼리로 월의 모든 데이터를 한 번에 가져오기
+      const year = currentMonth.getFullYear()
+      const month = currentMonth.getMonth()
+      const monthData = await getMonthMissionData(year, month)
       
-      // 각 날짜별로 두 부서의 미션 상태 확인
-      for (const day of days) {
+      // 모든 날짜의 상태 계산 (동기 함수이므로 Promise.all 불필요)
+      const status = {}
+      days.forEach((day) => {
         const dateStr = format(day, 'yyyy-MM-dd')
+        const sarangData = monthData[dateStr]?.sarang || null
+        const hanaData = monthData[dateStr]?.hana || null
+        
         status[dateStr] = {
-          sarang: await getMissionStatus(dateStr, 'sarang'),
-          hana: await getMissionStatus(dateStr, 'hana')
+          sarang: calculateMissionStatus(sarangData, day),
+          hana: calculateMissionStatus(hanaData, day)
         }
-      }
+      })
       
       setMissionStatus(status)
     } catch (error) {
@@ -37,34 +44,129 @@ const Calendar = ({ onDateClick, currentMonth, onMonthChange }) => {
       setLoading(false)
     }
   }
+  
+  // 미션 상태 계산 (동기 함수로 변경)
+  const calculateMissionStatus = (data, date) => {
+    if (!data) return { hasMissions: false, count: 0, details: [], totalScore: 0 }
+    
+    const dateObj = typeof date === 'string' ? parseISO(date) : date
+    let missionCount = 0
+    const details = []
+    
+    missions.forEach(mission => {
+      // 날짜 제한이 있는 미션은 해당 날짜에만 체크
+      if (mission.allowedDate) {
+        const allowedDate = parseISO(mission.allowedDate)
+        if (!isSameDay(dateObj, allowedDate)) {
+          return
+        }
+      }
+      
+      if (mission.id === 'meditation-share') {
+        const members = data.meditationMembers?.[mission.id] || []
+        if (members.length >= 6) {
+          missionCount++
+          details.push({ name: mission.name, points: mission.points })
+        }
+      } else if (mission.hasMemberList) {
+        const members = data.meditationMembers?.[mission.id] || []
+        if (members.length > 0) {
+          missionCount++
+          const points = members.length * mission.points
+          details.push({ name: mission.name, points, count: members.length })
+        }
+      } else {
+        const count = data.missions?.[mission.id] || 0
+        if (count > 0) {
+          missionCount++
+          if (mission.type === 'daily') {
+            details.push({ name: mission.name, points: mission.points })
+          } else {
+            const points = count * mission.points
+            details.push({ name: mission.name, points, count })
+          }
+        }
+      }
+    })
+    
+    return {
+      hasMissions: missionCount > 0,
+      count: missionCount,
+      details,
+      totalScore: calculateDailyScore(data, missions)
+    }
+  }
 
   const getMissionStatus = async (date, department) => {
     try {
       const data = await getMissionData(date, department)
-      if (!data || !data.missions) return { hasMissions: false, count: 0, details: [] }
+      if (!data) return { hasMissions: false, count: 0, details: [] }
       
-      const missionCount = Object.keys(data.missions).filter(
-        key => data.missions[key] > 0
-      ).length
+      // 미션이 있는지 확인 (missions와 meditationMembers 모두 체크)
+      const dateObj = typeof date === 'string' ? parseISO(date) : date
+      let missionCount = 0
+      missions.forEach(mission => {
+        // 날짜 제한이 있는 미션은 해당 날짜에만 체크
+        if (mission.allowedDate) {
+          const allowedDate = parseISO(mission.allowedDate)
+          if (!isSameDay(dateObj, allowedDate)) {
+            return
+          }
+        }
+        
+        if (mission.id === 'meditation-share') {
+          const members = data.meditationMembers?.[mission.id] || []
+          if (members.length >= 6) {
+            missionCount++
+          }
+        } else if (mission.hasMemberList) {
+          const members = data.meditationMembers?.[mission.id] || []
+          if (members.length > 0) {
+            missionCount++
+          }
+        } else {
+          const count = data.missions[mission.id] || 0
+          if (count > 0) {
+            missionCount++
+          }
+        }
+      })
       
       // 미션 상세 정보 가져오기
       const details = []
       missions.forEach(mission => {
-        const count = data.missions[mission.id] || 0
+        // 날짜 제한이 있는 미션은 해당 날짜에만 체크
+        if (mission.allowedDate) {
+          const allowedDate = parseISO(mission.allowedDate)
+          if (!isSameDay(dateObj, allowedDate)) {
+            return
+          }
+        }
+        
         if (mission.id === 'meditation-share') {
           // 묵상 공유는 6명 이상이어야 점수
           const members = data.meditationMembers?.[mission.id] || []
           if (members.length >= 6) {
             details.push({ name: mission.name, points: mission.points })
           }
-        } else if (mission.type === 'daily') {
-          if (count > 0) {
-            details.push({ name: mission.name, points: mission.points })
+        } else if (mission.hasMemberList) {
+          // 명단 기반 미션 (전도, 부서 심방 등)
+          const members = data.meditationMembers?.[mission.id] || []
+          if (members.length > 0) {
+            const points = members.length * mission.points
+            details.push({ name: mission.name, points, count: members.length })
           }
         } else {
-          if (count > 0) {
-            const points = count * mission.points
-            details.push({ name: mission.name, points, count })
+          const count = data.missions[mission.id] || 0
+          if (mission.type === 'daily') {
+            if (count > 0) {
+              details.push({ name: mission.name, points: mission.points })
+            }
+          } else {
+            if (count > 0) {
+              const points = count * mission.points
+              details.push({ name: mission.name, points, count })
+            }
           }
         }
       })
@@ -97,6 +199,26 @@ const Calendar = ({ onDateClick, currentMonth, onMonthChange }) => {
 
   const handleNextMonth = () => {
     onMonthChange(addMonths(currentMonth, 1))
+  }
+
+  const handleDeleteDepartment = async (date, department, departmentName) => {
+    if (!window.confirm(`${format(date, 'yyyy년 MM월 dd일')} ${departmentName} 데이터를 삭제하시겠습니까?`)) {
+      return
+    }
+
+    try {
+      await deleteDepartmentData(date, department)
+      // 캘린더 새로고침
+      await loadMonthMissions()
+      // 부모 컴포넌트에 새로고침 알림
+      if (onRefresh) {
+        onRefresh()
+      }
+      alert(`${departmentName} 데이터가 삭제되었습니다.`)
+    } catch (error) {
+      console.error('삭제 오류:', error)
+      alert('삭제 중 오류가 발생했습니다.')
+    }
   }
 
   const getDayStatus = (day) => {
@@ -186,13 +308,27 @@ const Calendar = ({ onDateClick, currentMonth, onMonthChange }) => {
               {(status?.sarangScore > 0 || status?.hanaScore > 0) && (
                 <div className="day-scores">
                   {status.sarangScore > 0 && (
-                    <div className="day-score sarang-score">
+                    <div 
+                      className="day-score sarang-score"
+                      onContextMenu={(e) => {
+                        e.preventDefault()
+                        handleDeleteDepartment(day, 'sarang', '사랑부')
+                      }}
+                      title="우클릭하여 삭제"
+                    >
                       <span className="score-label">사랑부</span>
                       <span className="score-value">{status.sarangScore}점</span>
                     </div>
                   )}
                   {status.hanaScore > 0 && (
-                    <div className="day-score hana-score">
+                    <div 
+                      className="day-score hana-score"
+                      onContextMenu={(e) => {
+                        e.preventDefault()
+                        handleDeleteDepartment(day, 'hana', '하나부')
+                      }}
+                      title="우클릭하여 삭제"
+                    >
                       <span className="score-label">하나부</span>
                       <span className="score-value">{status.hanaScore}점</span>
                     </div>

@@ -5,7 +5,8 @@ export const missions = [
     description: '말씀 듣는 사진 촬영',
     points: 5,
     unit: '1인',
-    type: 'person'
+    type: 'person',
+    hasMemberList: true
   },
   {
     id: 'department-visit',
@@ -14,7 +15,8 @@ export const missions = [
     points: 5,
     unit: '1인',
     type: 'person',
-    monthlyLimit: 2
+    monthlyLimit: 2,
+    hasMemberList: true
   },
   {
     id: 'testimony',
@@ -73,12 +75,44 @@ export const missions = [
     type: 'person'
   },
   {
-    id: 'winter-attendance',
-    name: '동계 참석',
-    description: '단체 사진 촬영',
+    id: 'winter-attendance-2025',
+    name: '동계참석',
+    description: '2025년 12월 28일 전용',
     points: 1,
     unit: '1인',
-    type: 'person'
+    type: 'person',
+    hasMemberList: true,
+    allowedDate: '2025-12-28'
+  },
+  {
+    id: 'bingo-3',
+    name: '빙고미션 (3빙고)',
+    description: '2025년 12월 28일 전용',
+    points: 3,
+    unit: '1인',
+    type: 'person',
+    hasMemberList: true,
+    allowedDate: '2025-12-28'
+  },
+  {
+    id: 'bingo-4',
+    name: '빙고미션 (4빙고)',
+    description: '2025년 12월 28일 전용',
+    points: 4,
+    unit: '1인',
+    type: 'person',
+    hasMemberList: true,
+    allowedDate: '2025-12-28'
+  },
+  {
+    id: 'bingo-5',
+    name: '빙고미션 (5빙고)',
+    description: '2025년 12월 28일 전용',
+    points: 5,
+    unit: '1인',
+    type: 'person',
+    hasMemberList: true,
+    allowedDate: '2025-12-28'
   }
 ]
 

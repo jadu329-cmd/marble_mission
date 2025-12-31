@@ -118,13 +118,13 @@
 }
 
 .sarang-score {
-  background: rgba(102, 126, 234, 0.15);
-  color: #667eea;
+  background: rgba(245, 87, 108, 0.15);
+  color: #f5576c;
 }
 
 .hana-score {
-  background: rgba(240, 147, 251, 0.15);
-  color: #f5576c;
+  background: rgba(102, 126, 234, 0.15);
+  color: #667eea;
 }
 
 .score-label {
@@ -152,11 +152,11 @@
 }
 
 .sarang-dot {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #f5576c 0%, #e63946 100%);
 }
 
 .hana-dot {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .day-tooltip {
@@ -205,11 +205,11 @@
 }
 
 .tooltip-dept-name.sarang {
-  color: #667eea;
+  color: #f5576c;
 }
 
 .tooltip-dept-name.hana {
-  color: #f5576c;
+  color: #667eea;
 }
 
 .tooltip-mission {
@@ -223,7 +223,7 @@
   padding-top: 6px;
   border-top: 1px solid #e0e0e0;
   font-weight: bold;
-  color: #667eea;
+  color: #333;
   font-size: 0.9rem;
 }
 

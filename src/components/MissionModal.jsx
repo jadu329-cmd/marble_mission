@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import { format } from 'date-fns'
+import { format, isSameDay } from 'date-fns'
 import { missions } from '../data/missions'
 import { departmentMembers } from '../data/members'
 import { getMissionData, saveMissionCheck, getMonthlyMissionCount } from '../services/missionService'
 import './MissionModal.css'
 
-const MissionModal = ({ isOpen, onClose, date, department: propDepartment, onDepartmentSelect }) => {
+const MissionModal = ({ isOpen, onClose, date, department: propDepartment, onDepartmentSelect, onSave }) => {
   const [selectedDepartment, setSelectedDepartment] = useState(propDepartment)
   const [missionCounts, setMissionCounts] = useState({})
   const [meditationMembers, setMeditationMembers] = useState({})
@@ -27,11 +27,19 @@ const MissionModal = ({ isOpen, onClose, date, department: propDepartment, onDep
     try {
       setLoading(true)
       const data = await getMissionData(date, selectedDepartment)
-      if (data && data.missions) {
-        setMissionCounts(data.missions)
-      } else {
-        setMissionCounts({})
-      }
+      
+      // missions 데이터 로드
+      const counts = data?.missions || {}
+      
+      // 명단 기반 미션의 경우 meditationMembers에서 count 계산
+      missions.forEach(mission => {
+        if (mission.hasMemberList) {
+          const members = data?.meditationMembers?.[mission.id] || []
+          counts[mission.id] = members.length
+        }
+      })
+      
+      setMissionCounts(counts)
       
       // 묵상 공유 멤버 데이터 로드
       if (data && data.meditationMembers) {
@@ -68,10 +76,19 @@ const MissionModal = ({ isOpen, onClose, date, department: propDepartment, onDep
     setSaving(true)
     try {
       await saveMissionCheck(date, selectedDepartment, missionId, newCount)
-      setMissionCounts(prev => ({
-        ...prev,
-        [missionId]: newCount
-      }))
+      setMissionCounts(prev => {
+        const updated = { ...prev }
+        if (newCount === 0) {
+          delete updated[missionId]
+        } else {
+          updated[missionId] = newCount
+        }
+        return updated
+      })
+      // 저장 후 콜백 호출
+      if (onSave) {
+        onSave()
+      }
     } catch (error) {
       console.error('미션 저장 오류:', error)
       const errorMessage = error.message || '알 수 없는 오류'
@@ -103,14 +120,95 @@ const MissionModal = ({ isOpen, onClose, date, department: propDepartment, onDep
     
     setSaving(true)
     try {
-      await saveMissionCheck(date, selectedDepartment, 'meditation-share', newCount, newMembers)
+      // 빈 배열이면 명시적으로 빈 배열 전달
+      const membersToSave = newMembers.length === 0 ? [] : newMembers
+      await saveMissionCheck(date, selectedDepartment, 'meditation-share', newCount, { [missionId]: membersToSave })
       
-      setMissionCounts(prev => ({
-        ...prev,
-        'meditation-share': newCount
-      }))
+      setMissionCounts(prev => {
+        const updated = { ...prev }
+        if (newCount === 0) {
+          delete updated['meditation-share']
+        } else {
+          updated['meditation-share'] = newCount
+        }
+        return updated
+      })
+      // 저장 후 콜백 호출
+      if (onSave) {
+        onSave()
+      }
     } catch (error) {
       console.error('묵상 저장 오류:', error)
+      const errorMessage = error.message || '알 수 없는 오류'
+      alert(`저장 중 오류가 발생했습니다.\n\n오류 내용: ${errorMessage}\n\nFirebase 설정을 확인해주세요.`)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleMemberToggle = async (missionId, memberName) => {
+    const mission = missions.find(m => m.id === missionId)
+    if (!mission) return
+
+    const currentMembers = meditationMembers[missionId] || []
+    const isChecked = currentMembers.includes(memberName)
+    
+    let newMembers
+    if (isChecked) {
+      newMembers = currentMembers.filter(m => m !== memberName)
+    } else {
+      newMembers = [...currentMembers, memberName]
+    }
+    
+    // 월 제한 체크 (부서 심방)
+    if (mission.monthlyLimit) {
+      try {
+        const currentMonthlyCount = await getMonthlyMissionCount(date, selectedDepartment, missionId)
+        // 부서 심방은 날짜별로 1회 카운트 (명단 인원수와 무관)
+        const currentDayHasCheck = currentMembers.length > 0 ? 1 : 0
+        const newDayHasCheck = newMembers.length > 0 ? 1 : 0
+        const newMonthlyTotal = currentMonthlyCount - currentDayHasCheck + newDayHasCheck
+        
+        if (newMonthlyTotal > mission.monthlyLimit) {
+          alert(`${mission.name}은(는) 월 ${mission.monthlyLimit}회로 제한됩니다.`)
+          return
+        }
+      } catch (error) {
+        console.error('월 제한 체크 오류:', error)
+      }
+    }
+
+    const newCount = newMembers.length
+    
+    // state 업데이트 전에 최신 meditationMembers를 가져옴
+    // 빈 배열도 명시적으로 전달 (0명 처리)
+    const updatedMembers = { ...meditationMembers, [missionId]: newMembers }
+    
+    setMeditationMembers(prev => ({
+      ...prev,
+      [missionId]: newMembers
+    }))
+
+    setSaving(true)
+    try {
+      // 명단 기반 미션은 빈 배열도 명시적으로 전달
+      await saveMissionCheck(date, selectedDepartment, missionId, newCount, updatedMembers)
+      
+      setMissionCounts(prev => {
+        const updated = { ...prev }
+        if (newCount === 0) {
+          delete updated[missionId]
+        } else {
+          updated[missionId] = newCount
+        }
+        return updated
+      })
+      // 저장 후 콜백 호출
+      if (onSave) {
+        onSave()
+      }
+    } catch (error) {
+      console.error('멤버 저장 오류:', error)
       const errorMessage = error.message || '알 수 없는 오류'
       alert(`저장 중 오류가 발생했습니다.\n\n오류 내용: ${errorMessage}\n\nFirebase 설정을 확인해주세요.`)
     } finally {
@@ -131,19 +229,33 @@ const MissionModal = ({ isOpen, onClose, date, department: propDepartment, onDep
   const calculateDailyScore = () => {
     let total = 0
     missions.forEach(mission => {
-      const count = missionCounts[mission.id] || 0
+      // 날짜 제한이 있는 미션은 해당 날짜에만 계산
+      if (mission.allowedDate) {
+        const allowedDate = new Date(mission.allowedDate)
+        if (!isSameDay(date, allowedDate)) {
+          return
+        }
+      }
+      
       if (mission.id === 'meditation-share') {
         // 묵상 공유는 6명 이상이어야 점수 획득
         const members = meditationMembers[mission.id] || []
         if (members.length >= 6) {
           total += mission.points
         }
-      } else if (mission.type === 'daily') {
-        if (count > 0) {
-          total += mission.points
-        }
+      } else if (mission.hasMemberList) {
+        // 명단 기반 미션 (전도, 부서 심방, 동계참석 등)
+        const members = meditationMembers[mission.id] || []
+        total += members.length * mission.points
       } else {
-        total += count * mission.points
+        const count = missionCounts[mission.id] || 0
+        if (mission.type === 'daily') {
+          if (count > 0) {
+            total += mission.points
+          }
+        } else {
+          total += count * mission.points
+        }
       }
     })
     return total
@@ -189,7 +301,9 @@ const MissionModal = ({ isOpen, onClose, date, department: propDepartment, onDep
     )
   }
 
-  const members = departmentMembers[selectedDepartment] || []
+  const deptData = departmentMembers[selectedDepartment] || { brothers: [], sisters: [] }
+  const brothers = deptData.brothers || []
+  const sisters = deptData.sisters || []
   const meditationCheckedMembers = meditationMembers['meditation-share'] || []
 
   return (
@@ -220,7 +334,14 @@ const MissionModal = ({ isOpen, onClose, date, department: propDepartment, onDep
           </div>
 
           <div className="missions-list">
-            {missions.map(mission => {
+            {missions.filter(mission => {
+              // 날짜 제한이 있는 미션은 해당 날짜에만 표시
+              if (mission.allowedDate) {
+                const allowedDate = new Date(mission.allowedDate)
+                return isSameDay(date, allowedDate)
+              }
+              return true
+            }).map(mission => {
               if (mission.id === 'meditation-share') {
                 // 묵상 공유는 특별 처리
                 return (
@@ -237,21 +358,45 @@ const MissionModal = ({ isOpen, onClose, date, department: propDepartment, onDep
                     </div>
                     
                     <div className="meditation-members">
-                      <div className="members-grid">
-                        {members.map(member => {
-                          const isChecked = meditationCheckedMembers.includes(member)
-                          return (
-                            <button
-                              key={member}
-                              className={`member-checkbox ${isChecked ? 'checked' : ''}`}
-                              onClick={() => handleMeditationToggle(member)}
-                              disabled={saving}
-                            >
-                              {member}
-                              {isChecked && <span className="check-mark">✓</span>}
-                            </button>
-                          )
-                        })}
+                      <div className="members-split-container">
+                        <div className="members-section">
+                          <div className="members-section-title">형제</div>
+                          <div className="members-grid">
+                            {brothers.map(member => {
+                              const isChecked = meditationCheckedMembers.includes(member)
+                              return (
+                                <button
+                                  key={member}
+                                  className={`member-checkbox ${isChecked ? 'checked' : ''}`}
+                                  onClick={() => handleMeditationToggle(member)}
+                                  disabled={saving}
+                                >
+                                  {member}
+                                  {isChecked && <span className="check-mark">✓</span>}
+                                </button>
+                              )
+                            })}
+                          </div>
+                        </div>
+                        <div className="members-section">
+                          <div className="members-section-title">자매</div>
+                          <div className="members-grid">
+                            {sisters.map(member => {
+                              const isChecked = meditationCheckedMembers.includes(member)
+                              return (
+                                <button
+                                  key={member}
+                                  className={`member-checkbox ${isChecked ? 'checked' : ''}`}
+                                  onClick={() => handleMeditationToggle(member)}
+                                  disabled={saving}
+                                >
+                                  {member}
+                                  {isChecked && <span className="check-mark">✓</span>}
+                                </button>
+                              )
+                            })}
+                          </div>
+                        </div>
                       </div>
                     </div>
                     
@@ -262,6 +407,78 @@ const MissionModal = ({ isOpen, onClose, date, department: propDepartment, onDep
                 )
               }
 
+              // 명단 선택이 필요한 미션 (전도, 부서 심방)
+              if (mission.hasMemberList) {
+                const checkedMembers = meditationMembers[mission.id] || []
+                const count = checkedMembers.length
+                const score = count * mission.points
+
+                return (
+                  <div key={mission.id} className="mission-item meditation-item">
+                    <div className="mission-info">
+                      <div className="mission-name">{mission.name}</div>
+                      <div className="mission-description">{mission.description}</div>
+                      {mission.monthlyLimit && (
+                        <div className="mission-limit">
+                          (월 {mission.monthlyLimit}회 제한)
+                        </div>
+                      )}
+                      <div className="meditation-status">
+                        현재: {count}명
+                      </div>
+                    </div>
+                    
+                    <div className="meditation-members">
+                      <div className="members-split-container">
+                        <div className="members-section">
+                          <div className="members-section-title">형제</div>
+                          <div className="members-grid">
+                            {brothers.map(member => {
+                              const isChecked = checkedMembers.includes(member)
+                              return (
+                                <button
+                                  key={member}
+                                  className={`member-checkbox ${isChecked ? 'checked' : ''}`}
+                                  onClick={() => handleMemberToggle(mission.id, member)}
+                                  disabled={saving}
+                                >
+                                  {member}
+                                  {isChecked && <span className="check-mark">✓</span>}
+                                </button>
+                              )
+                            })}
+                          </div>
+                        </div>
+                        <div className="members-section">
+                          <div className="members-section-title">자매</div>
+                          <div className="members-grid">
+                            {sisters.map(member => {
+                              const isChecked = checkedMembers.includes(member)
+                              return (
+                                <button
+                                  key={member}
+                                  className={`member-checkbox ${isChecked ? 'checked' : ''}`}
+                                  onClick={() => handleMemberToggle(mission.id, member)}
+                                  disabled={saving}
+                                >
+                                  {member}
+                                  {isChecked && <span className="check-mark">✓</span>}
+                                </button>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="mission-score">
+                      {score}점
+                    </div>
+                  </div>
+                )
+              }
+
+              // 일반 미션 (+/- 버튼)
               const count = missionCounts[mission.id] || 0
               const score = mission.type === 'daily' 
                 ? (count > 0 ? mission.points : 0)
