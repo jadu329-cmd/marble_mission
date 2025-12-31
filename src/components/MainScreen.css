@@ -1,15 +1,17 @@
 .main-screen {
   background: white;
   border-radius: 20px;
-  padding: 30px;
+  padding: 15px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
+  margin-bottom: 10px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .header {
   text-align: center;
-  margin-bottom: 30px;
-  padding-bottom: 20px;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
   border-bottom: 2px solid #e0e0e0;
 }
 
@@ -25,7 +27,7 @@
 }
 
 .score-board {
-  margin-bottom: 30px;
+  margin-bottom: 15px;
 }
 
 .score-board h2 {
@@ -161,13 +163,14 @@
 
 @media (max-width: 768px) {
   .main-screen {
-    padding: 15px;
-    border-radius: 15px;
+    padding: 10px;
+    border-radius: 12px;
+    margin-bottom: 5px;
   }
 
   .header {
-    margin-bottom: 20px;
-    padding-bottom: 15px;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
   }
 
   .header h1 {
