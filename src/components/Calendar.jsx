@@ -332,6 +332,13 @@ const Calendar = ({ onDateClick, currentMonth, onMonthChange, onRefresh }) => {
             <div
               key={dateStr}
               className={`calendar-day ${isToday ? 'today' : ''} ${status?.total > 0 ? 'has-missions' : ''}`}
+              onContextMenu={(e) => {
+                // 안드로이드 기본 컨텍스트 메뉴(복사/번역) 막기
+                if (window.innerWidth <= 768) {
+                  e.preventDefault()
+                  e.stopPropagation()
+                }
+              }}
               onClick={() => {
                 // 일반 클릭: 모달 열기 (꾹 누르기가 아닌 경우만)
                 if (longPressTimer === null) {
@@ -341,6 +348,9 @@ const Calendar = ({ onDateClick, currentMonth, onMonthChange, onRefresh }) => {
               onTouchStart={(e) => {
                 // 모바일에서 꾹 누르기 감지
                 if (window.innerWidth <= 768 && status && status.total > 0) {
+                  // 안드로이드 기본 컨텍스트 메뉴 막기
+                  e.preventDefault()
+                  
                   const dayElement = e.currentTarget
                   const tooltip = dayElement.querySelector('.day-tooltip')
                   
