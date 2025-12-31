@@ -356,18 +356,18 @@
   }
 
   .day-score {
-    font-size: 0.65rem;
-    padding: 1px 2px;
-    line-height: 1.1;
+    font-size: 0.55rem;
+    padding: 1px 1px;
+    line-height: 1;
   }
 
   .score-label {
-    font-size: 0.7rem !important;
+    font-size: 0.6rem !important;
   }
 
   .score-value {
-    font-size: 0.7rem !important;
-    line-height: 1.1;
+    font-size: 0.6rem !important;
+    line-height: 1;
   }
 
   .status-dot {

@@ -7,6 +7,7 @@ import './Calendar.css'
 const Calendar = ({ onDateClick, currentMonth, onMonthChange, onRefresh }) => {
   const [missionStatus, setMissionStatus] = useState({})
   const [loading, setLoading] = useState(true)
+  const [longPressTimer, setLongPressTimer] = useState(null)
 
   useEffect(() => {
     const year = currentMonth.getFullYear()
@@ -331,21 +332,62 @@ const Calendar = ({ onDateClick, currentMonth, onMonthChange, onRefresh }) => {
             <div
               key={dateStr}
               className={`calendar-day ${isToday ? 'today' : ''} ${status?.total > 0 ? 'has-missions' : ''}`}
-              onClick={() => onDateClick(day)}
+              onClick={() => {
+                // 일반 클릭: 모달 열기 (꾹 누르기가 아닌 경우만)
+                if (longPressTimer === null) {
+                  onDateClick(day)
+                }
+              }}
               onTouchStart={(e) => {
-                // 모바일에서 터치 시 툴팁 표시 (모달 열기 전에)
+                // 모바일에서 꾹 누르기 감지
                 if (window.innerWidth <= 768 && status && status.total > 0) {
-                  e.stopPropagation()
-                  e.preventDefault()
                   const dayElement = e.currentTarget
                   const tooltip = dayElement.querySelector('.day-tooltip')
+                  
                   if (tooltip) {
-                    // 다른 툴팁 숨기기
-                    document.querySelectorAll('.day-tooltip').forEach(t => {
-                      if (t !== tooltip) t.classList.remove('show')
-                    })
-                    tooltip.classList.toggle('show')
+                    // 꾹 누르기 타이머 설정 (500ms)
+                    const timer = setTimeout(() => {
+                      // 다른 툴팁 숨기기
+                      document.querySelectorAll('.day-tooltip').forEach(t => {
+                        t.classList.remove('show')
+                      })
+                      document.body.classList.remove('mobile-tooltip-open')
+                      
+                      // 툴팁 표시
+                      tooltip.classList.add('show')
+                      document.body.classList.add('mobile-tooltip-open')
+                      
+                      // 배경 클릭 시 닫기
+                      const closeTooltip = (event) => {
+                        if (!tooltip.contains(event.target) && event.target !== tooltip && !tooltip.querySelector('.tooltip-close-btn')?.contains(event.target)) {
+                          tooltip.classList.remove('show')
+                          document.body.classList.remove('mobile-tooltip-open')
+                          document.removeEventListener('touchstart', closeTooltip)
+                        }
+                      }
+                      setTimeout(() => {
+                        document.addEventListener('touchstart', closeTooltip, { once: true })
+                      }, 100)
+                      
+                      setLongPressTimer(null)
+                    }, 500)
+                    
+                    setLongPressTimer(timer)
                   }
+                }
+              }}
+              onTouchEnd={(e) => {
+                // 터치 종료 시 타이머 취소 (일반 클릭으로 처리)
+                if (longPressTimer) {
+                  clearTimeout(longPressTimer)
+                  setLongPressTimer(null)
+                }
+              }}
+              onTouchMove={(e) => {
+                // 터치 이동 시 타이머 취소 (꾹 누르기 취소)
+                if (longPressTimer) {
+                  clearTimeout(longPressTimer)
+                  setLongPressTimer(null)
                 }
               }}
             >
@@ -400,6 +442,39 @@ const Calendar = ({ onDateClick, currentMonth, onMonthChange, onRefresh }) => {
                   </div>
                   {tooltipContent && (
                     <div className="day-tooltip">
+                      <button 
+                        className="tooltip-close-btn"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          const tooltip = e.currentTarget.closest('.day-tooltip')
+                          if (tooltip) {
+                            tooltip.classList.remove('show')
+                            document.body.classList.remove('mobile-tooltip-open')
+                          }
+                        }}
+                        style={{
+                          position: 'absolute',
+                          top: '-15px',
+                          right: '-15px',
+                          width: '32px',
+                          height: '32px',
+                          background: '#667eea',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '50%',
+                          fontSize: '1.2rem',
+                          fontWeight: 'bold',
+                          cursor: 'pointer',
+                          zIndex: 2001,
+                          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          padding: 0
+                        }}
+                      >
+                        ✕
+                      </button>
                       {tooltipContent}
                     </div>
                   )}
