@@ -1,5 +1,13 @@
 export const missions = [
   {
+    id: 'meditation-share',
+    name: '말씀 묵상 공유',
+    description: '부서별 일일 6명 이상 공유',
+    points: 1,
+    unit: '1일',
+    type: 'daily'
+  },
+  {
     id: 'evangelism',
     name: '전도',
     description: '말씀 듣는 사진 촬영',
@@ -25,14 +33,6 @@ export const missions = [
     points: 1,
     unit: '1인',
     type: 'person'
-  },
-  {
-    id: 'meditation-share',
-    name: '말씀 묵상 공유',
-    description: '부서별 일일 6명 이상 공유',
-    points: 1,
-    unit: '1일',
-    type: 'daily'
   },
   {
     id: 'sunday-meditation',
