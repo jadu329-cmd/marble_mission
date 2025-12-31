@@ -46,6 +46,7 @@
   grid-template-columns: repeat(7, 1fr);
   gap: 4px;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .calendar-weekday {
@@ -232,9 +233,12 @@
 
 @media (max-width: 768px) {
   .calendar-container {
-    padding: 8px;
+    padding: 8px 4px; /* 좌우 패딩 축소 */
     border-radius: 12px;
     margin-bottom: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden; /* 가로 스크롤 방지 */
   }
 
   .calendar-header {
@@ -252,18 +256,20 @@
   }
 
   .calendar-grid {
-    gap: 4px;
+    gap: 3px;
+    padding: 0 2px; /* 좌우 여백 추가로 잘림 방지 */
   }
 
   .calendar-weekday {
-    padding: 8px 4px;
+    padding: 8px 2px;
     font-size: 0.75rem;
   }
 
   .calendar-day {
-    padding: 4px 2px;
+    padding: 4px 1px;
     border-width: 1.5px;
     min-height: 50px;
+    box-sizing: border-box;
   }
 
   .day-number {
@@ -322,12 +328,14 @@
   }
 
   .calendar-grid {
-    gap: 3px;
+    gap: 2px;
+    padding: 0 1px; /* 좌우 여백 추가 */
   }
 
   .calendar-day {
     min-height: 45px;
-    padding: 3px 1px;
+    padding: 3px 0.5px;
+    box-sizing: border-box;
   }
 
   .day-number {

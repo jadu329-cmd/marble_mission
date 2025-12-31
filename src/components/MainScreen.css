@@ -163,9 +163,11 @@
 
 @media (max-width: 768px) {
   .main-screen {
-    padding: 10px;
-    border-radius: 12px;
-    margin-bottom: 5px;
+    padding: 10px 8px; /* 좌우 패딩 축소 */
+    border-radius: 0;
+    margin-bottom: 0;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .header {
@@ -204,7 +206,7 @@
   }
 
   .score-value {
-    font-size: 2rem;
+    font-size: 2.4rem; /* 20% 증가: 2rem * 1.2 */
   }
 
   .score-unit {
@@ -239,7 +241,7 @@
   }
 
   .score-value {
-    font-size: 1.8rem;
+    font-size: 2.16rem; /* 20% 증가: 1.8rem * 1.2 */
   }
 }
 
