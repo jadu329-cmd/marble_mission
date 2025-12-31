@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, getDay, addMonths, subMonths, parseISO } from 'date-fns'
-import { getMissionData, calculateDailyScore, deleteDepartmentData, getMonthMissionData } from '../services/missionService'
+import { getMissionData, calculateDailyScore, deleteDepartmentData, getMonthMissionData, subscribeMonthMissionData } from '../services/missionService'
 import { missions } from '../data/missions'
 import './Calendar.css'
 
@@ -9,7 +9,36 @@ const Calendar = ({ onDateClick, currentMonth, onMonthChange, onRefresh }) => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    loadMonthMissions()
+    const year = currentMonth.getFullYear()
+    const month = currentMonth.getMonth()
+    
+    // 실시간 구독 설정
+    const unsubscribe = subscribeMonthMissionData(year, month, (monthData) => {
+      const monthStart = startOfMonth(currentMonth)
+      const monthEnd = endOfMonth(currentMonth)
+      const days = eachDayOfInterval({ start: monthStart, end: monthEnd })
+      
+      // 모든 날짜의 상태 계산
+      const status = {}
+      days.forEach((day) => {
+        const dateStr = format(day, 'yyyy-MM-dd')
+        const sarangData = monthData[dateStr]?.sarang || null
+        const hanaData = monthData[dateStr]?.hana || null
+        
+        status[dateStr] = {
+          sarang: calculateMissionStatus(sarangData, day),
+          hana: calculateMissionStatus(hanaData, day)
+        }
+      })
+      
+      setMissionStatus(status)
+      setLoading(false)
+    })
+    
+    // cleanup: 컴포넌트 언마운트 시 구독 해제
+    return () => {
+      unsubscribe()
+    }
   }, [currentMonth])
 
   const loadMonthMissions = async () => {

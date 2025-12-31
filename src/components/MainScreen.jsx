@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { getAllTimeScores } from '../services/missionService'
-import { departments } from '../data/missions'
+import { getAllTimeScores, subscribeAllMissionData, calculateDailyScore } from '../services/missionService'
+import { departments, missions } from '../data/missions'
 import Calendar from './Calendar'
 import MissionModal from './MissionModal'
 import MonthlyStats from './MonthlyStats'
@@ -17,7 +17,31 @@ const MainScreen = () => {
   const [calendarRefreshKey, setCalendarRefreshKey] = useState(0)
 
   useEffect(() => {
+    // 실시간 구독 설정
+    const unsubscribe = subscribeAllMissionData((querySnapshot) => {
+      const scores = { sarang: 0, hana: 0 }
+      
+      querySnapshot.forEach((doc) => {
+        const data = doc.data()
+        const score = calculateDailyScore(data, missions)
+        if (data.department === 'sarang') {
+          scores.sarang += score
+        } else if (data.department === 'hana') {
+          scores.hana += score
+        }
+      })
+      
+      setScores(scores)
+      setLoading(false)
+    })
+    
+    // 초기 로드
     loadScores()
+    
+    // cleanup: 컴포넌트 언마운트 시 구독 해제
+    return () => {
+      unsubscribe()
+    }
   }, [])
 
   const loadScores = async () => {

@@ -8,7 +8,8 @@ import {
   query, 
   where,
   Timestamp,
-  FieldValue
+  FieldValue,
+  onSnapshot
 } from 'firebase/firestore'
 import { db, isFirebaseConfigured } from '../firebase/config'
 import { format, isSameDay } from 'date-fns'
@@ -84,6 +85,64 @@ export const getMonthMissionData = async (year, month) => {
     console.error('월별 미션 데이터 가져오기 오류:', error)
     throw error
   }
+}
+
+// 월의 모든 미션 데이터를 실시간으로 구독 (onSnapshot)
+export const subscribeMonthMissionData = (year, month, callback) => {
+  if (!isFirebaseConfigured() || !db) {
+    return () => {}
+  }
+  
+  const firstDay = new Date(year, month, 1)
+  const lastDay = new Date(year, month + 1, 0)
+  const startStr = formatDate(firstDay)
+  const endStr = formatDate(lastDay)
+  
+  const missionsRef = collection(db, 'missions')
+  const q = query(
+    missionsRef,
+    where('date', '>=', startStr),
+    where('date', '<=', endStr)
+  )
+  
+  const unsubscribe = onSnapshot(q, (querySnapshot) => {
+    const monthData = {}
+    
+    querySnapshot.forEach((doc) => {
+      const data = doc.data()
+      const dateStr = data.date
+      const dept = data.department
+      
+      if (!monthData[dateStr]) {
+        monthData[dateStr] = { sarang: null, hana: null }
+      }
+      
+      monthData[dateStr][dept] = data
+    })
+    
+    callback(monthData)
+  }, (error) => {
+    console.error('월별 미션 데이터 실시간 구독 오류:', error)
+  })
+  
+  return unsubscribe
+}
+
+// 모든 미션 데이터를 실시간으로 구독 (총 점수용)
+export const subscribeAllMissionData = (callback) => {
+  if (!isFirebaseConfigured() || !db) {
+    return () => {}
+  }
+  
+  const missionsRef = collection(db, 'missions')
+  
+  const unsubscribe = onSnapshot(missionsRef, (querySnapshot) => {
+    callback(querySnapshot)
+  }, (error) => {
+    console.error('전체 미션 데이터 실시간 구독 오류:', error)
+  })
+  
+  return unsubscribe
 }
 
 // 특정 날짜의 특정 부서 데이터 삭제

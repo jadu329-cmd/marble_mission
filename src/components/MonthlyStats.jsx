@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { getMonthlyScores, getMonthlyMissionScores } from '../services/missionService'
+import { getMonthlyScores, getMonthlyMissionScores, subscribeMonthMissionData, calculateDailyScore } from '../services/missionService'
 import { missions, departments } from '../data/missions'
 import { format } from 'date-fns'
 import './MonthlyStats.css'
@@ -11,7 +11,104 @@ const MonthlyStats = ({ currentMonth, onMonthChange }) => {
   const [showDetails, setShowDetails] = useState(false)
 
   useEffect(() => {
+    const year = currentMonth.getFullYear()
+    const month = currentMonth.getMonth()
+    
+    // 실시간 구독 설정
+    const unsubscribe = subscribeMonthMissionData(year, month, (monthData) => {
+      // 월별 점수 계산
+      const scores = { sarang: 0, hana: 0 }
+      const missionScores = { sarang: {}, hana: {} }
+      
+      // 각 미션별로 초기화
+      missions.forEach(mission => {
+        missionScores.sarang[mission.id] = 0
+        missionScores.hana[mission.id] = 0
+      })
+      
+      // 데이터 처리
+      Object.values(monthData).forEach((dayData) => {
+        if (dayData.sarang) {
+          const score = calculateDailyScore(dayData.sarang, missions)
+          scores.sarang += score
+          
+          // 미션별 점수 계산
+          const missionCounts = dayData.sarang.missions || {}
+          const meditationMembers = dayData.sarang.meditationMembers || {}
+          
+          missions.forEach(mission => {
+            let missionScore = 0
+            
+            if (mission.id === 'meditation-share') {
+              const members = meditationMembers[mission.id] || []
+              if (members.length >= 6) {
+                missionScore = mission.points
+              }
+            } else if (mission.hasMemberList) {
+              const members = meditationMembers[mission.id] || []
+              missionScore = members.length * mission.points
+            } else {
+              const count = missionCounts[mission.id] || 0
+              if (mission.type === 'daily') {
+                if (count > 0) {
+                  missionScore = mission.points
+                }
+              } else {
+                missionScore = count * mission.points
+              }
+            }
+            
+            missionScores.sarang[mission.id] += missionScore
+          })
+        }
+        
+        if (dayData.hana) {
+          const score = calculateDailyScore(dayData.hana, missions)
+          scores.hana += score
+          
+          // 미션별 점수 계산
+          const missionCounts = dayData.hana.missions || {}
+          const meditationMembers = dayData.hana.meditationMembers || {}
+          
+          missions.forEach(mission => {
+            let missionScore = 0
+            
+            if (mission.id === 'meditation-share') {
+              const members = meditationMembers[mission.id] || []
+              if (members.length >= 6) {
+                missionScore = mission.points
+              }
+            } else if (mission.hasMemberList) {
+              const members = meditationMembers[mission.id] || []
+              missionScore = members.length * mission.points
+            } else {
+              const count = missionCounts[mission.id] || 0
+              if (mission.type === 'daily') {
+                if (count > 0) {
+                  missionScore = mission.points
+                }
+              } else {
+                missionScore = count * mission.points
+              }
+            }
+            
+            missionScores.hana[mission.id] += missionScore
+          })
+        }
+      })
+      
+      setMonthlyScores(scores)
+      setMissionScores(missionScores)
+      setLoading(false)
+    })
+    
+    // 초기 로드
     loadMonthlyStats()
+    
+    // cleanup: 컴포넌트 언마운트 시 구독 해제
+    return () => {
+      unsubscribe()
+    }
   }, [currentMonth])
 
   const loadMonthlyStats = async () => {
