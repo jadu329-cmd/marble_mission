@@ -367,7 +367,7 @@ const Calendar = ({ onDateClick, currentMonth, onMonthChange, onRefresh }) => {
                       tooltip.classList.add('show')
                       document.body.classList.add('mobile-tooltip-open')
                       
-                      // 배경 클릭 시 닫기
+                      // 배경 클릭 시 닫기 (배경 오버레이가 없으므로 툴팁 외부 클릭 시 닫기)
                       const closeTooltip = (event) => {
                         if (!tooltip.contains(event.target) && event.target !== tooltip && !tooltip.querySelector('.tooltip-close-btn')?.contains(event.target)) {
                           tooltip.classList.remove('show')
