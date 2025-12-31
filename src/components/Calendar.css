@@ -188,6 +188,13 @@
   transform: translateX(-50%) translateY(-5px);
 }
 
+@media (max-width: 768px) {
+  /* 모바일에서는 툴팁 완전히 숨김 (호버가 없으므로) */
+  .day-tooltip {
+    display: none;
+  }
+}
+
 .day-tooltip-content {
   font-size: 0.85rem;
 }

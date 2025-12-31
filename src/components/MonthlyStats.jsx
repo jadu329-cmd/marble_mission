@@ -202,6 +202,18 @@ const MonthlyStats = ({ currentMonth, onMonthChange }) => {
               const hanaScore = missionScores.hana[mission.id] || 0
               const diff = sarangScore - hanaScore
               
+              // 차이 표시 형식 변경: 하나부가 더 크면 "하나부 +6" 형식
+              let diffDisplay = '0'
+              let diffClassName = ''
+              
+              if (diff > 0) {
+                diffDisplay = `+${diff}`
+                diffClassName = 'sarang-lead'
+              } else if (diff < 0) {
+                diffDisplay = `하나부 +${Math.abs(diff)}`
+                diffClassName = 'hana-lead'
+              }
+              
               return (
                 <div key={mission.id} className="table-row">
                   <div className="mission-name-col">{mission.name}</div>
@@ -211,8 +223,8 @@ const MonthlyStats = ({ currentMonth, onMonthChange }) => {
                   <div className={`score-col ${hanaScore > sarangScore ? 'leading' : ''}`}>
                     {hanaScore}점
                   </div>
-                  <div className={`diff-col ${diff > 0 ? 'sarang-lead' : diff < 0 ? 'hana-lead' : ''}`}>
-                    {diff > 0 ? `+${diff}` : diff < 0 ? diff : '0'}
+                  <div className={`diff-col ${diffClassName}`}>
+                    {diffDisplay}
                   </div>
                 </div>
               )

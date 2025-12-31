@@ -213,7 +213,7 @@
 }
 
 .diff-col.hana-lead {
-  color: #667eea;
+  color: #667eea; /* 보라색 유지 */
 }
 
 @media (max-width: 768px) {

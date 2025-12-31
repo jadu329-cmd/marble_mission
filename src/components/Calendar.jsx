@@ -340,10 +340,14 @@ const Calendar = ({ onDateClick, currentMonth, onMonthChange, onRefresh }) => {
                     <div 
                       className="day-score sarang-score"
                       onContextMenu={(e) => {
+                        // 모바일에서는 우클릭 기능 비활성화
+                        if (window.innerWidth <= 768) {
+                          return
+                        }
                         e.preventDefault()
                         handleDeleteDepartment(day, 'sarang', '사랑부')
                       }}
-                      title="우클릭하여 삭제"
+                      title={window.innerWidth > 768 ? "우클릭하여 삭제" : ""}
                     >
                       <span className="score-label">사랑부</span>
                       <span className="score-value">{status.sarangScore}점</span>
@@ -353,10 +357,14 @@ const Calendar = ({ onDateClick, currentMonth, onMonthChange, onRefresh }) => {
                     <div 
                       className="day-score hana-score"
                       onContextMenu={(e) => {
+                        // 모바일에서는 우클릭 기능 비활성화
+                        if (window.innerWidth <= 768) {
+                          return
+                        }
                         e.preventDefault()
                         handleDeleteDepartment(day, 'hana', '하나부')
                       }}
-                      title="우클릭하여 삭제"
+                      title={window.innerWidth > 768 ? "우클릭하여 삭제" : ""}
                     >
                       <span className="score-label">하나부</span>
                       <span className="score-value">{status.hanaScore}점</span>
