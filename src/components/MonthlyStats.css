@@ -209,15 +209,116 @@
 }
 
 @media (max-width: 768px) {
-  .table-header,
-  .table-row {
-    grid-template-columns: 2fr 1fr 1fr 1fr;
-    font-size: 0.9rem;
-    padding: 10px;
+  .monthly-stats {
+    padding: 15px;
+    border-radius: 12px;
+  }
+
+  .stats-header {
+    gap: 15px;
+    margin-bottom: 15px;
+  }
+
+  .stats-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .month-nav-btn {
+    width: 35px;
+    height: 35px;
+    font-size: 1.2rem;
   }
 
   .monthly-scores-container {
     grid-template-columns: 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+  }
+
+  .monthly-score-card {
+    padding: 18px;
+  }
+
+  .monthly-score-card .department-name {
+    font-size: 1rem;
+  }
+
+  .monthly-score-card .score-value {
+    font-size: 1.8rem;
+  }
+
+  .monthly-score-card .score-unit {
+    font-size: 0.9rem;
+  }
+
+  .toggle-details-btn {
+    padding: 10px;
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+  }
+
+  .mission-details {
+    padding: 15px;
+  }
+
+  .mission-details h3 {
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+  }
+
+  .table-header,
+  .table-row {
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    font-size: 0.85rem;
+    padding: 10px 8px;
+    gap: 8px;
+  }
+
+  .mission-name-col {
+    font-size: 0.85rem;
+  }
+
+  .score-col {
+    font-size: 0.85rem;
+  }
+
+  .score-col.leading {
+    font-size: 0.95rem;
+  }
+
+  .diff-col {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .monthly-stats {
+    padding: 12px;
+  }
+
+  .stats-header h2 {
+    font-size: 1rem;
+  }
+
+  .monthly-score-card .score-value {
+    font-size: 1.6rem;
+  }
+
+  .table-header,
+  .table-row {
+    grid-template-columns: 1.5fr 1fr 1fr 1fr;
+    font-size: 0.75rem;
+    padding: 8px 6px;
+    gap: 6px;
+  }
+
+  .mission-name-col {
+    font-size: 0.75rem;
+  }
+
+  .score-col,
+  .diff-col {
+    font-size: 0.75rem;
   }
 }
 

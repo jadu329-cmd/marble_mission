@@ -229,33 +229,120 @@
 
 @media (max-width: 768px) {
   .calendar-container {
-    padding: 15px;
+    padding: 10px;
+    border-radius: 12px;
   }
 
-  .calendar-month {
+  .calendar-header {
+    margin-bottom: 15px;
+  }
+
+  .calendar-nav-btn {
+    width: 35px;
+    height: 35px;
     font-size: 1.2rem;
   }
 
+  .calendar-month {
+    font-size: 1.1rem;
+  }
+
+  .calendar-grid {
+    gap: 4px;
+  }
+
+  .calendar-weekday {
+    padding: 8px 4px;
+    font-size: 0.75rem;
+  }
+
   .calendar-day {
-    padding: 5px;
+    padding: 4px 2px;
+    border-width: 1.5px;
+    min-height: 50px;
   }
 
   .day-number {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    margin-bottom: 2px;
+  }
+
+  .day-scores {
+    gap: 1px;
+    margin-top: 1px;
   }
 
   .day-score {
-    font-size: 0.5rem;
-    padding: 1px 3px;
+    font-size: 0.65rem;
+    padding: 1px 2px;
+    line-height: 1.1;
   }
 
   .score-label {
-    font-size: 0.9rem;
+    font-size: 0.7rem !important;
   }
 
   .score-value {
-    font-size: 0.9rem;
-    line-height: 1;
+    font-size: 0.7rem !important;
+    line-height: 1.1;
+  }
+
+  .status-dot {
+    width: 6px;
+    height: 6px;
+  }
+
+  .day-tooltip {
+    min-width: 200px;
+    max-width: 280px;
+    padding: 10px;
+    font-size: 0.8rem;
+  }
+
+  .tooltip-dept-name {
+    font-size: 0.85rem;
+  }
+
+  .tooltip-mission {
+    font-size: 0.75rem;
+  }
+
+  .tooltip-total {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .calendar-container {
+    padding: 8px;
+  }
+
+  .calendar-grid {
+    gap: 3px;
+  }
+
+  .calendar-day {
+    min-height: 45px;
+    padding: 3px 1px;
+  }
+
+  .day-number {
+    font-size: 0.75rem;
+  }
+
+  .day-score {
+    font-size: 0.6rem;
+    padding: 0.5px 1px;
+  }
+
+  .score-label,
+  .score-value {
+    font-size: 0.65rem !important;
+  }
+
+  .calendar-weekday {
+    font-size: 0.7rem;
+    padding: 6px 2px;
   }
 }
 

@@ -161,19 +161,56 @@
 
 @media (max-width: 768px) {
   .main-screen {
-    padding: 20px;
+    padding: 15px;
+    border-radius: 15px;
+  }
+
+  .header {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
   }
 
   .header h1 {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+  }
+
+  .score-board {
+    margin-bottom: 20px;
+  }
+
+  .score-board h2 {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
   }
 
   .scores-container {
     grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .score-card {
+    padding: 20px;
+  }
+
+  .department-name {
+    font-size: 1rem;
+  }
+
+  .score-value {
+    font-size: 2rem;
+  }
+
+  .score-unit {
+    font-size: 0.9rem;
   }
 
   .controls {
     flex-direction: column;
+    gap: 15px;
   }
 
   .date-selector,
@@ -184,6 +221,22 @@
   .date-selector input,
   .department-selector select {
     flex: 1;
+    font-size: 0.9rem;
+    padding: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-screen {
+    padding: 10px;
+  }
+
+  .header h1 {
+    font-size: 1.1rem;
+  }
+
+  .score-value {
+    font-size: 1.8rem;
   }
 }
 

@@ -18,5 +18,16 @@ body {
 #root {
   max-width: 1200px;
   margin: 0 auto;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+  
+  #root {
+    max-width: 100%;
+  }
 }
 
