@@ -43,7 +43,7 @@
 
 .calendar-grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr)); /* minmax로 균등 분할 */
   gap: 4px;
   width: 100%;
   box-sizing: border-box;
@@ -189,9 +189,72 @@
 }
 
 @media (max-width: 768px) {
-  /* 모바일에서는 툴팁 완전히 숨김 (호버가 없으므로) */
+  /* 모바일에서 툴팁을 터치로 표시 */
   .day-tooltip {
-    display: none;
+    display: block;
+    opacity: 0;
+    pointer-events: none;
+    position: fixed; /* fixed로 변경하여 화면 잘림 방지 */
+    bottom: auto;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    max-width: 90vw;
+    min-width: 280px;
+    z-index: 2000;
+    margin: 0;
+    transition: opacity 0.3s, transform 0.3s;
+  }
+
+  .day-tooltip.show {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  /* 툴팁 배경 오버레이 */
+  .day-tooltip.show::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: -1;
+  }
+
+  /* 툴팁 닫기 버튼 */
+  .day-tooltip.show::after {
+    content: '✕';
+    position: absolute;
+    top: -15px;
+    right: -15px;
+    width: 32px;
+    height: 32px;
+    background: #667eea;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 2001;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  /* 배경 클릭 시 툴팁 닫기 */
+  body.mobile-tooltip-open::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1999;
   }
 }
 
@@ -263,8 +326,11 @@
   }
 
   .calendar-grid {
-    gap: 3px;
-    padding: 0 2px; /* 좌우 여백 추가로 잘림 방지 */
+    gap: 2px;
+    padding: 0;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: visible; /* 잘림 방지 */
   }
 
   .calendar-weekday {
@@ -309,11 +375,72 @@
     height: 6px;
   }
 
+  /* 모바일에서 툴팁을 터치로 표시 */
   .day-tooltip {
-    min-width: 200px;
-    max-width: 280px;
-    padding: 10px;
-    font-size: 0.8rem;
+    display: block;
+    opacity: 0;
+    pointer-events: none;
+    position: fixed; /* fixed로 변경하여 화면 잘림 방지 */
+    bottom: auto;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    max-width: 90vw;
+    min-width: 280px;
+    z-index: 2000;
+    margin: 0;
+    transition: opacity 0.3s, transform 0.3s;
+  }
+
+  .day-tooltip.show {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  /* 툴팁 배경 오버레이 */
+  .day-tooltip.show::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: -1;
+  }
+
+  /* 툴팁 닫기 버튼 */
+  .day-tooltip.show::after {
+    content: '✕';
+    position: absolute;
+    top: -15px;
+    right: -15px;
+    width: 32px;
+    height: 32px;
+    background: #667eea;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 2001;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  /* 배경 클릭 시 툴팁 닫기 */
+  body.mobile-tooltip-open::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1999;
   }
 
   .tooltip-dept-name {
@@ -336,7 +463,9 @@
 
   .calendar-grid {
     gap: 2px;
-    padding: 0 1px; /* 좌우 여백 추가 */
+    padding: 0;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .calendar-day {

@@ -332,6 +332,22 @@ const Calendar = ({ onDateClick, currentMonth, onMonthChange, onRefresh }) => {
               key={dateStr}
               className={`calendar-day ${isToday ? 'today' : ''} ${status?.total > 0 ? 'has-missions' : ''}`}
               onClick={() => onDateClick(day)}
+              onTouchStart={(e) => {
+                // 모바일에서 터치 시 툴팁 표시 (모달 열기 전에)
+                if (window.innerWidth <= 768 && status && status.total > 0) {
+                  e.stopPropagation()
+                  e.preventDefault()
+                  const dayElement = e.currentTarget
+                  const tooltip = dayElement.querySelector('.day-tooltip')
+                  if (tooltip) {
+                    // 다른 툴팁 숨기기
+                    document.querySelectorAll('.day-tooltip').forEach(t => {
+                      if (t !== tooltip) t.classList.remove('show')
+                    })
+                    tooltip.classList.toggle('show')
+                  }
+                }
+              }}
             >
               <div className="day-number">{format(day, 'd')}</div>
               {(status?.sarangScore > 0 || status?.hanaScore > 0) && (

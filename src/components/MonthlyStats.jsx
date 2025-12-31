@@ -202,7 +202,7 @@ const MonthlyStats = ({ currentMonth, onMonthChange }) => {
               const hanaScore = missionScores.hana[mission.id] || 0
               const diff = sarangScore - hanaScore
               
-              // 차이 표시 형식 변경: 하나부가 더 크면 "하나부 +6" 형식
+              // 차이 표시: 색깔로만 구분 (+6 또는 -6)
               let diffDisplay = '0'
               let diffClassName = ''
               
@@ -210,7 +210,7 @@ const MonthlyStats = ({ currentMonth, onMonthChange }) => {
                 diffDisplay = `+${diff}`
                 diffClassName = 'sarang-lead'
               } else if (diff < 0) {
-                diffDisplay = `하나부 +${Math.abs(diff)}`
+                diffDisplay = `+${Math.abs(diff)}`
                 diffClassName = 'hana-lead'
               }
               
