@@ -115,8 +115,8 @@ const MissionModal = ({ isOpen, onClose, date, department: propDepartment, onDep
       [missionId]: newMembers
     }))
     
-    // 6명 이상이면 1점, 아니면 0점
-    const newCount = newMembers.length >= 6 ? 1 : 0
+    // 명단 기반 미션이므로 count는 0으로 설정 (실제 점수는 meditationMembers로 계산)
+    const newCount = 0
     
     setSaving(true)
     try {
@@ -350,8 +350,8 @@ const MissionModal = ({ isOpen, onClose, date, department: propDepartment, onDep
                       <div className="mission-name">{mission.name}</div>
                       <div className="mission-description">{mission.description}</div>
                       <div className="meditation-status">
-                        현재: {meditationCheckedMembers.length}명 / 필요: 6명 이상
-                        {meditationCheckedMembers.length >= 6 && (
+                        현재: {meditationCheckedMembers.length}명 / 필요: 4명 이상
+                        {meditationCheckedMembers.length >= 4 && (
                           <span className="status-success"> ✓ 달성</span>
                         )}
                       </div>

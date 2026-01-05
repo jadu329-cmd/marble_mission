@@ -2,7 +2,7 @@ export const missions = [
   {
     id: 'meditation-share',
     name: '말씀 묵상 공유',
-    description: '부서별 일일 6명 이상 공유',
+    description: '부서별 일일 4명 이상 공유',
     points: 1,
     unit: '1일',
     type: 'daily'
