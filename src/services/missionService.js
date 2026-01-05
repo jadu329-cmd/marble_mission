@@ -12,7 +12,7 @@ import {
   onSnapshot
 } from 'firebase/firestore'
 import { db, isFirebaseConfigured } from '../firebase/config'
-import { format, isSameDay } from 'date-fns'
+import { format, isSameDay, isBefore, parseISO } from 'date-fns'
 import { missions } from '../data/missions'
 
 // 날짜를 YYYY-MM-DD 형식으로 변환
@@ -285,6 +285,33 @@ export const saveMissionCheck = async (date, department, missionId, count, medit
   }
 }
 
+// 묵상 공유 점수 계산 (2026년 1월 1일부터 규칙 변경)
+export const calculateMeditationShareScore = (memberCount, date) => {
+  const newRuleDateStr = '2026-01-01' // 2026년 1월 1일
+  
+  // 날짜 문자열 비교 (시간대 문제 방지)
+  let dateStr = null
+  if (date) {
+    if (typeof date === 'string') {
+      dateStr = date.split('T')[0] // '2026-01-01' 형식으로 추출
+    } else {
+      dateStr = format(date, 'yyyy-MM-dd')
+    }
+  }
+  
+  // 2026년 1월 1일 이전: 6명 이상 시 1점
+  if (dateStr && dateStr < newRuleDateStr) {
+    return memberCount >= 6 ? 1 : 0
+  }
+  
+  // 2026년 1월 1일 이후 (포함): 4명 이상 시 점수 = 인원수 - 3
+  if (memberCount >= 4) {
+    return memberCount - 3
+  }
+  
+  return 0
+}
+
 // 부서별 일일 점수 계산
 export const calculateDailyScore = (missionData, missions) => {
   if (!missionData) return 0
@@ -304,11 +331,10 @@ export const calculateDailyScore = (missionData, missions) => {
     }
     
     if (mission.id === 'meditation-share') {
-      // 묵상 공유는 6명 이상이어야 점수 획득
+      // 묵상 공유 점수 계산 (2026년 1월 1일 기준 규칙 변경)
       const members = meditationMembers[mission.id] || []
-      if (members.length >= 6) {
-        totalScore += mission.points
-      }
+      const score = calculateMeditationShareScore(members.length, missionData.date)
+      totalScore += score
     } else if (mission.hasMemberList) {
       // 명단 기반 미션 (전도, 부서 심방, 동계참석 등)
       const members = meditationMembers[mission.id] || []
@@ -534,9 +560,8 @@ export const getMonthlyMissionScores = async (year, month) => {
         
         if (mission.id === 'meditation-share') {
           const members = meditationMembers[mission.id] || []
-          if (members.length >= 6) {
-            score = mission.points
-          }
+          const dataDateStr = data.date
+          score = calculateMeditationShareScore(members.length, dataDateStr)
         } else if (mission.hasMemberList) {
           const members = meditationMembers[mission.id] || []
           score = members.length * mission.points

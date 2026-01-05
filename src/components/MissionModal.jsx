@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { format, isSameDay } from 'date-fns'
 import { missions } from '../data/missions'
 import { departmentMembers } from '../data/members'
-import { getMissionData, saveMissionCheck, getMonthlyMissionCount } from '../services/missionService'
+import { getMissionData, saveMissionCheck, getMonthlyMissionCount, calculateMeditationShareScore } from '../services/missionService'
 import './MissionModal.css'
 
 const MissionModal = ({ isOpen, onClose, date, department: propDepartment, onDepartmentSelect, onSave }) => {
@@ -238,11 +238,11 @@ const MissionModal = ({ isOpen, onClose, date, department: propDepartment, onDep
       }
       
       if (mission.id === 'meditation-share') {
-        // 묵상 공유는 6명 이상이어야 점수 획득
+        // 묵상 공유 점수 계산 (2026년 1월 1일 기준 규칙 변경)
         const members = meditationMembers[mission.id] || []
-        if (members.length >= 6) {
-          total += mission.points
-        }
+        const dateStr = format(date, 'yyyy-MM-dd')
+        const score = calculateMeditationShareScore(members.length, dateStr)
+        total += score
       } else if (mission.hasMemberList) {
         // 명단 기반 미션 (전도, 부서 심방, 동계참석 등)
         const members = meditationMembers[mission.id] || []
@@ -401,7 +401,7 @@ const MissionModal = ({ isOpen, onClose, date, department: propDepartment, onDep
                     </div>
                     
                     <div className="mission-score">
-                      {meditationCheckedMembers.length >= 6 ? mission.points : 0}점
+                      {calculateMeditationShareScore(meditationCheckedMembers.length, format(date, 'yyyy-MM-dd'))}점
                     </div>
                   </div>
                 )

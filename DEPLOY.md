@@ -86,6 +86,61 @@ vercel
 
 ## 문제 해결
 
+### 일부 데스크탑에서 접속이 안 되는 경우
+
+모바일에서는 접속이 되는데 데스크탑 일부에서만 접속이 안 되는 경우, 다음 방법을 시도해보세요:
+
+#### 1. 브라우저 캐시 삭제 (가장 흔한 원인)
+**Chrome/Edge:**
+- `Ctrl + Shift + Delete` (Windows) 또는 `Cmd + Shift + Delete` (Mac)
+- "캐시된 이미지 및 파일" 선택
+- 시간 범위: "전체 기간"
+- 데이터 삭제 클릭
+
+**또는 시크릿 모드로 접속:**
+- `Ctrl + Shift + N` (Chrome) 또는 `Ctrl + Shift + P` (Edge)
+- 시크릿 창에서 https://marblemisson.web.app/ 접속
+
+#### 2. 하드 새로고침
+- `Ctrl + F5` (Windows) 또는 `Cmd + Shift + R` (Mac)
+- 또는 `Ctrl + Shift + R` (브라우저에 따라 다름)
+
+#### 3. DNS 캐시 삭제
+**Windows:**
+```bash
+ipconfig /flushdns
+```
+
+**Mac:**
+```bash
+sudo dscacheutil -flushcache
+sudo killall -HUP mDNSResponder
+```
+
+#### 4. 다른 브라우저로 접속 테스트
+- Chrome, Firefox, Edge 등 다른 브라우저로 접속해보기
+- 특정 브라우저에서만 문제가 있다면 브라우저 호환성 문제일 수 있음
+
+#### 5. 네트워크/방화벽 확인
+- 회사 네트워크나 공공 Wi-Fi를 사용 중이라면, 다른 네트워크(모바일 핫스팟 등)로 접속 테스트
+- 방화벽이나 보안 프로그램이 Firebase 도메인을 차단하는지 확인
+- 회사 네트워크 관리자에게 Firebase Hosting 도메인 허용 요청
+
+#### 6. 브라우저 확장 프로그램 비활성화
+- 광고 차단기나 보안 확장 프로그램이 사이트를 차단할 수 있음
+- 확장 프로그램을 일시적으로 비활성화하고 접속 테스트
+
+#### 7. Firebase Hosting 캐시 초기화
+- Firebase Console > Hosting > 설정에서 캐시 무효화 또는 재배포
+- 또는 다음 명령어로 재배포:
+```bash
+firebase deploy --only hosting --force
+```
+
+#### 8. 브라우저 콘솔에서 에러 확인
+- F12 > Console 탭에서 에러 메시지 확인
+- Network 탭에서 실패한 요청 확인
+
 ### 배포 후 데이터가 저장되지 않는 경우
 
 1. **Firebase 설정 확인**

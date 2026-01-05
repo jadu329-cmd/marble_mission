@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, getDay, addMonths, subMonths, parseISO } from 'date-fns'
-import { getMissionData, calculateDailyScore, deleteDepartmentData, getMonthMissionData, subscribeMonthMissionData } from '../services/missionService'
+import { getMissionData, calculateDailyScore, deleteDepartmentData, getMonthMissionData, subscribeMonthMissionData, calculateMeditationShareScore } from '../services/missionService'
 import { missions } from '../data/missions'
 import './Calendar.css'
 
@@ -94,9 +94,11 @@ const Calendar = ({ onDateClick, currentMonth, onMonthChange, onRefresh }) => {
       
       if (mission.id === 'meditation-share') {
         const members = data.meditationMembers?.[mission.id] || []
-        if (members.length >= 6) {
+        const dateStr = format(dateObj, 'yyyy-MM-dd')
+        const score = calculateMeditationShareScore(members.length, dateStr)
+        if (score > 0) {
           missionCount++
-          details.push({ name: mission.name, points: mission.points })
+          details.push({ name: mission.name, points: score })
         }
       } else if (mission.hasMemberList) {
         const members = data.meditationMembers?.[mission.id] || []
@@ -146,7 +148,9 @@ const Calendar = ({ onDateClick, currentMonth, onMonthChange, onRefresh }) => {
         
         if (mission.id === 'meditation-share') {
           const members = data.meditationMembers?.[mission.id] || []
-          if (members.length >= 6) {
+          const dateStr = format(dateObj, 'yyyy-MM-dd')
+          const score = calculateMeditationShareScore(members.length, dateStr)
+          if (score > 0) {
             missionCount++
           }
         } else if (mission.hasMemberList) {
@@ -174,10 +178,12 @@ const Calendar = ({ onDateClick, currentMonth, onMonthChange, onRefresh }) => {
         }
         
         if (mission.id === 'meditation-share') {
-          // 묵상 공유는 6명 이상이어야 점수
+          // 묵상 공유 점수 계산 (2026년 1월 1일 기준 규칙 변경)
           const members = data.meditationMembers?.[mission.id] || []
-          if (members.length >= 6) {
-            details.push({ name: mission.name, points: mission.points })
+          const dateStr = format(dateObj, 'yyyy-MM-dd')
+          const score = calculateMeditationShareScore(members.length, dateStr)
+          if (score > 0) {
+            details.push({ name: mission.name, points: score })
           }
         } else if (mission.hasMemberList) {
           // 명단 기반 미션 (전도, 부서 심방 등)
